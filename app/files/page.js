@@ -1,6 +1,8 @@
 import { createServerClient } from '@/lib/supabaseClient'
 import DownloadButton from '@/app/components/DownloadButton'
 
+export const dynamic = 'force-dynamic'
+
 async function getFiles() {
   const supabase = createServerClient()
   
