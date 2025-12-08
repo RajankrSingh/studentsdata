@@ -1,23 +1,45 @@
 import { createServerClient } from '@/lib/supabaseClient'
 import DownloadButton from '@/app/components/DownloadButton'
 
-async function getFiles() {
-  const supabase = createServerClient()
-  
-  const { data, error } = await supabase.storage
-    .from('uploads')
-    .list('', {
-      limit: 100,
-      offset: 0,
-      sortBy: { column: 'created_at', order: 'desc' }
-    })
+export const dynamic = 'force-dynamic'
 
-  if (error) {
-    console.error('Error fetching files:', error)
+async function getFiles() {
+  // Check if environment variables are set
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!supabaseUrl || !supabaseServiceKey) {
+    // During build time or when env vars aren't set, return empty array
+    // This prevents build failures while still allowing the page to render
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Supabase environment variables not configured. Add them to .env.local')
+    }
     return []
   }
 
-  return data || []
+  try {
+    const supabase = createServerClient()
+    
+    const { data, error } = await supabase.storage
+      .from('uploads')
+      .list('', {
+        limit: 100,
+        offset: 0,
+        sortBy: { column: 'created_at', order: 'desc' }
+      })
+
+    if (error) {
+      console.error('Error fetching files:', error)
+      return []
+    }
+
+    return data || []
+  } catch (error) {
+    // Catch any errors during client creation or file fetching
+    // This ensures the page can still render even if Supabase isn't configured
+    console.error('Error initializing Supabase client:', error.message)
+    return []
+  }
 }
 
 function formatDateFromFileName(fileName) {

@@ -114,7 +114,22 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Production Deployment
 
-1. Set environment variables in your hosting platform (Vercel, Netlify, etc.)
+### Vercel Deployment
+
+For detailed Vercel setup instructions, see **[VERCEL_SETUP.md](./VERCEL_SETUP.md)**
+
+Quick steps:
+1. Add environment variables in Vercel Dashboard → Settings → Environment Variables:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+2. Redeploy your application
+3. Verify the build completes successfully
+
+### Other Platforms
+
+1. Set environment variables in your hosting platform:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
 2. Build the project: `npm run build`
 3. Start the server: `npm start`
 
