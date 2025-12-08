@@ -1,4 +1,5 @@
 import { createServerClient } from '@/lib/supabaseClient'
+import DownloadButton from '@/app/components/DownloadButton'
 
 async function getFiles() {
   const supabase = createServerClient()
@@ -19,16 +20,6 @@ async function getFiles() {
   return data || []
 }
 
-async function getDownloadUrl(fileName) {
-  const supabase = createServerClient()
-  
-  const { data } = await supabase.storage
-    .from('uploads')
-    .createSignedUrl(fileName, 3600) // URL valid for 1 hour
-
-  return data?.signedUrl || null
-}
-
 function formatDateFromFileName(fileName) {
   const match = fileName.match(/-(\d+)\./)
   if (!match) return 'N/A'
@@ -44,17 +35,6 @@ function formatDateFromFileName(fileName) {
 
 export default async function FilesPage() {
   const files = await getFiles()
-  
-  // Fetch download URLs for all files
-  const filesWithUrls = await Promise.all(
-    files.map(async (file) => {
-      const downloadUrl = await getDownloadUrl(file.name)
-      return {
-        ...file,
-        downloadUrl
-      }
-    })
-  )
 
   return (
     <div style={styles.container}>
@@ -82,24 +62,14 @@ export default async function FilesPage() {
             </tr>
           </thead>
           <tbody>
-            {filesWithUrls.map((file) => (
+            {files.map((file) => (
               <tr key={file.name} style={styles.tr}>
                 <td style={styles.td}>{file.name}</td>
                 <td style={styles.td}>
                   {formatDateFromFileName(file.name)}
                 </td>
                 <td style={styles.td}>
-                  {file.downloadUrl ? (
-                    <a
-                      href={file.downloadUrl}
-                      download={file.name}
-                      style={styles.downloadButton}
-                    >
-                      Download
-                    </a>
-                  ) : (
-                    <span style={styles.errorText}>Error generating URL</span>
-                  )}
+                  <DownloadButton fileName={file.name} />
                 </td>
               </tr>
             ))}
