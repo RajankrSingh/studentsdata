@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import AuthGuard from './components/AuthGuard'
 
-export default function UploadPage() {
+function UploadPageContent() {
   const [message, setMessage] = useState('')
   const [isUploading, setIsUploading] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -34,139 +36,161 @@ export default function UploadPage() {
     }
   }
 
+  const handleDrag = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true)
+    } else if (e.type === 'dragleave') {
+      setDragActive(false)
+    }
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const fileInput = document.getElementById('file')
+      fileInput.files = e.dataTransfer.files
+    }
+  }
+
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>File Upload</h1>
-      <p style={styles.subtitle}>Upload Excel or CSV files</p>
-
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <div style={styles.inputGroup}>
-          <label htmlFor="file" style={styles.label}>
-            Select File (Excel/CSV only):
-          </label>
-          <input
-            type="file"
-            id="file"
-            name="file"
-            accept=".xls,.xlsx,.csv"
-            required
-            style={styles.input}
-          />
+    <div className="min-h-screen flex items-center justify-center p-4 animate-fade-in">
+      <div className="w-full max-w-2xl">
+        {/* Header Section */}
+        <div className="text-center mb-8 animate-slide-up">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-3">
+            File Upload System
+          </h1>
+          <p className="text-gray-600 text-lg">Upload Excel or CSV files securely</p>
         </div>
 
-        <button
-          type="submit"
-          disabled={isUploading}
-          style={{
-            ...styles.button,
-            ...(isUploading && styles.buttonDisabled)
-          }}
-        >
-          {isUploading ? 'Uploading...' : 'Upload'}
-        </button>
-      </form>
+        {/* Upload Card */}
+        <div className="card animate-slide-up">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-6">
+              <label htmlFor="file" className="block text-sm font-semibold text-gray-700 mb-3">
+                Select File (Excel/CSV only)
+              </label>
+              
+              {/* Drag and Drop Area */}
+              <div
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
+                  dragActive
+                    ? 'border-blue-500 bg-blue-50 scale-105'
+                    : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <svg
+                    className="w-16 h-16 text-blue-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  <div>
+                    <p className="text-gray-700 font-medium">
+                      Drag and drop your file here, or
+                    </p>
+                    <label htmlFor="file" className="text-blue-600 hover:text-blue-700 cursor-pointer font-semibold underline">
+                      browse to upload
+                    </label>
+                  </div>
+                  <p className="text-sm text-gray-500">Supports .xls, .xlsx, .csv files</p>
+                </div>
+                <input
+                  type="file"
+                  id="file"
+                  name="file"
+                  accept=".xls,.xlsx,.csv"
+                  required
+                  className="hidden"
+                />
+              </div>
+            </div>
 
-      {message && (
-        <div
-          style={{
-            ...styles.message,
-            ...(message.startsWith('Success') ? styles.success : styles.error)
-          }}
-        >
-          {message}
+            <button
+              type="submit"
+              disabled={isUploading}
+              className="btn-primary w-full flex items-center justify-center space-x-2"
+            >
+              {isUploading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Uploading...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <span>Upload File</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Message Display */}
+          {message && (
+            <div
+              className={`mt-6 p-4 rounded-lg flex items-center space-x-3 animate-fade-in ${
+                message.startsWith('Success')
+                  ? 'bg-green-50 border-2 border-green-200 text-green-800'
+                  : 'bg-red-50 border-2 border-red-200 text-red-800'
+              }`}
+            >
+              {message.startsWith('Success') ? (
+                <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+              <p className="font-medium">{message}</p>
+            </div>
+          )}
         </div>
-      )}
 
-      <div style={styles.footer}>
-        <a href="/files" style={styles.link}>
-          View All Files →
-        </a>
+        {/* Footer Link */}
+        <div className="mt-8 text-center">
+          <a
+            href="/files"
+            className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200 group"
+          >
+            <span>View All Files</span>
+            <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
   )
 }
 
-const styles = {
-  container: {
-    maxWidth: '600px',
-    margin: '50px auto',
-    padding: '30px',
-    fontFamily: 'system-ui, -apple-system, sans-serif'
-  },
-  title: {
-    fontSize: '32px',
-    marginBottom: '10px',
-    color: '#333'
-  },
-  subtitle: {
-    fontSize: '16px',
-    color: '#666',
-    marginBottom: '30px'
-  },
-  form: {
-    backgroundColor: '#f9f9f9',
-    padding: '30px',
-    borderRadius: '8px',
-    border: '1px solid #ddd'
-  },
-  inputGroup: {
-    marginBottom: '20px'
-  },
-  label: {
-    display: 'block',
-    marginBottom: '8px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#333'
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    fontSize: '14px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    boxSizing: 'border-box'
-  },
-  button: {
-    width: '100%',
-    padding: '12px',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: 'white',
-    backgroundColor: '#0070f3',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s'
-  },
-  buttonDisabled: {
-    backgroundColor: '#999',
-    cursor: 'not-allowed'
-  },
-  message: {
-    marginTop: '20px',
-    padding: '12px',
-    borderRadius: '4px',
-    fontSize: '14px'
-  },
-  success: {
-    backgroundColor: '#d4edda',
-    color: '#155724',
-    border: '1px solid #c3e6cb'
-  },
-  error: {
-    backgroundColor: '#f8d7da',
-    color: '#721c24',
-    border: '1px solid #f5c6cb'
-  },
-  footer: {
-    marginTop: '30px',
-    textAlign: 'center'
-  },
-  link: {
-    color: '#0070f3',
-    textDecoration: 'none',
-    fontSize: '14px'
-  }
+export default function UploadPage() {
+  return (
+    <AuthGuard>
+      <UploadPageContent />
+    </AuthGuard>
+  )
 }
-
