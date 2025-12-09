@@ -21,20 +21,22 @@ export async function POST(request) {
       )
     }
 
-    // Validate file type (Excel/CSV only)
+    // Validate file type (Excel/CSV/ZIP only)
     const allowedTypes = [
       'application/vnd.ms-excel',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'text/csv',
-      'application/csv'
+      'application/csv',
+      'application/zip',
+      'application/x-zip-compressed'
     ]
     
     const fileExtension = file.name.split('.').pop().toLowerCase()
-    const allowedExtensions = ['xls', 'xlsx', 'csv']
+    const allowedExtensions = ['xls', 'xlsx', 'csv', 'zip']
     
     if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
       return NextResponse.json(
-        { error: 'Only Excel (.xls, .xlsx) and CSV (.csv) files are allowed' },
+        { error: 'Only Excel (.xls, .xlsx), CSV (.csv), and ZIP (.zip) files are allowed' },
         { status: 400 }
       )
     }
