@@ -17,7 +17,15 @@ export async function GET() {
       }, { status: 200 })
     }
 
-    const supabase = createServerClient()
+    let supabase
+    try {
+      supabase = createServerClient()
+    } catch (error) {
+      return NextResponse.json({ 
+        files: [],
+        error: 'Supabase client initialization failed' 
+      }, { status: 200 })
+    }
     
     const { data, error } = await supabase.storage
       .from('uploads')
