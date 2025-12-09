@@ -1,70 +1,44 @@
 'use client'
 
-import { useState } from 'react'
-import AuthGuard from './components/AuthGuard'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
-function UploadPageContent() {
-  const [message, setMessage] = useState('')
-  const [isUploading, setIsUploading] = useState(false)
-  const [dragActive, setDragActive] = useState(false)
+export default function LandingPage() {
+  const router = useRouter()
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    setMessage('')
-    setIsUploading(true)
-
-    const formData = new FormData(e.target)
-
-    try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setMessage(`Success! File "${data.fileName}" uploaded successfully.`)
-        e.target.reset() // Reset form
-      } else {
-        setMessage(`Error: ${data.error}`)
-      }
-    } catch (error) {
-      setMessage(`Error: ${error.message}`)
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  const handleDrag = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true)
-    } else if (e.type === 'dragleave') {
-      setDragActive(false)
-    }
-  }
-
-  const handleDrop = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
+  useEffect(() => {
+    // Check if user is already authenticated and redirect accordingly
+    const authStatus = localStorage.getItem('isAuthenticated')
+    const userType = localStorage.getItem('userType')
     
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const fileInput = document.getElementById('file')
-      fileInput.files = e.dataTransfer.files
+    if (authStatus === 'true' && userType) {
+      if (userType === 'distributor') {
+        router.push('/distributor/dashboard')
+      } else if (userType === 'school') {
+        router.push('/school/dashboard')
+      }
     }
-  }
+  }, [router])
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 animate-fade-in">
-      <div className="w-full max-w-2xl">
-        {/* Header Section */}
-        <div className="text-center mb-8 animate-slide-up">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-3">
-            File Upload System
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="w-full max-w-4xl">
+        <div className="text-center mb-12 animate-slide-up">
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+            Welcome
           </h1>
+          <p className="text-gray-600 text-xl">Choose your login portal</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6 animate-slide-up">
+          {/* Distributor Login Card */}
+          <div className="card hover:scale-105 transition-transform duration-300 cursor-pointer group"
+               onClick={() => router.push('/distributor/login')}>
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
           <p className="text-gray-600 text-lg">Upload Excel, CSV, or ZIP files securely</p>
         </div>
 
@@ -121,76 +95,38 @@ function UploadPageContent() {
                   className="hidden"
                 />
               </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isUploading}
-              className="btn-primary w-full flex items-center justify-center space-x-2"
-            >
-              {isUploading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>Uploading...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  <span>Upload File</span>
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Message Display */}
-          {message && (
-            <div
-              className={`mt-6 p-4 rounded-lg flex items-center space-x-3 animate-fade-in ${
-                message.startsWith('Success')
-                  ? 'bg-green-50 border-2 border-green-200 text-green-800'
-                  : 'bg-red-50 border-2 border-red-200 text-red-800'
-              }`}
-            >
-              {message.startsWith('Success') ? (
-                <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">Distributor Login</h2>
+              <p className="text-gray-600 mb-6">Access your distributor dashboard to manage files and data</p>
+              <button className="btn-primary w-full">
+                Login as Distributor
+                <svg className="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
-              ) : (
-                <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              )}
-              <p className="font-medium">{message}</p>
+              </button>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Footer Link */}
-        <div className="mt-8 text-center">
-          <a
-            href="/files"
-            className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200 group"
-          >
-            <span>View All Files</span>
-            <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </a>
+          {/* School Login Card */}
+          <div className="card hover:scale-105 transition-transform duration-300 cursor-pointer group"
+               onClick={() => router.push('/school/login')}>
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">School Login</h2>
+              <p className="text-gray-600 mb-6">Access your school dashboard to view and manage student data</p>
+              <button className="btn-primary w-full">
+                Login as School
+                <svg className="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  )
-}
-
-export default function UploadPage() {
-  return (
-    <AuthGuard>
-      <UploadPageContent />
-    </AuthGuard>
   )
 }
