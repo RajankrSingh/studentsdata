@@ -1,0 +1,163 @@
+{
+  "BATCH-6": [
+    {
+      "id": 1,
+      "srNo": 1,
+      "imageUploaded": true,
+      "imageName": "1003-27983.png",
+      "studentName": "AARAV SINGH",
+      "fatherName": "A",
+      "mobileNo": "",
+      "address": "",
+      "class": "VII-B",
+      "session": "2025-26",
+      "admissionNo": "",
+      "bloodGroup": "",
+      "cardBatch": "BATCH-6"
+    },
+    {
+      "id": 2,
+      "srNo": 2,
+      "imageUploaded": true,
+      "imageName": "1003-27982.png",
+      "studentName": "KARTIKEY SINGH",
+      "fatherName": "ASHUTOSH SINGH",
+      "mobileNo": "9305191912",
+      "address": "DHARAULI MUSAFIRKHANA AMETHI",
+      "class": "VII-B",
+      "session": "2025-26",
+      "admissionNo": "WID0114",
+      "bloodGroup": "B+",
+      "cardBatch": "BATCH-6"
+    },
+    {
+      "id": 3,
+      "srNo": 3,
+      "imageUploaded": true,
+      "imageName": "1003-27981.png",
+      "studentName": "ANANT",
+      "fatherName": "AMIT",
+      "mobileNo": "9415048701",
+      "address": "PETROL PUMP",
+      "class": "VII-B",
+      "session": "2025-26",
+      "admissionNo": "WID1117",
+      "bloodGroup": "A+",
+      "cardBatch": "BATCH-6"
+    },
+    {
+      "id": 4,
+      "srNo": 4,
+      "imageUploaded": false,
+      "imageName": "",
+      "studentName": "RAHUL KUMAR",
+      "fatherName": "RAJESH KUMAR",
+      "mobileNo": "9876543210",
+      "address": "SECTOR 15, NOIDA",
+      "class": "VII-B",
+      "session": "2025-26",
+      "admissionNo": "WID1118",
+      "bloodGroup": "O+",
+      "cardBatch": "BATCH-6"
+    },
+    {
+      "id": 5,
+      "srNo": 5,
+      "imageUploaded": true,
+      "imageName": "1003-27980.png",
+      "studentName": "PRIYA SHARMA",
+      "fatherName": "SURESH SHARMA",
+      "mobileNo": "9123456789",
+      "address": "MAIN MARKET, DELHI",
+      "class": "VII-B",
+      "session": "2025-26",
+      "admissionNo": "WID1119",
+      "bloodGroup": "AB+",
+      "cardBatch": "BATCH-6"
+    }
+  ],
+  "BATCH-5": [
+    {
+      "id": 6,
+      "srNo": 1,
+      "imageUploaded": true,
+      "imageName": "1003-27979.png",
+      "studentName": "AMIT VERMA",
+      "fatherName": "RAVI VERMA",
+      "mobileNo": "9988776655",
+      "address": "GANDHI NAGAR",
+      "class": "VI-A",
+      "session": "2024-25",
+      "admissionNo": "WID1120",
+      "bloodGroup": "A-",
+      "cardBatch": "BATCH-5"
+    },
+    {
+      "id": 7,
+      "srNo": 2,
+      "imageUploaded": true,
+      "imageName": "1003-27978.png",
+      "studentName": "SITA DEVI",
+      "fatherName": "RAM KUMAR",
+      "mobileNo": "9876543211",
+      "address": "VILLAGE ROAD",
+      "class": "VI-A",
+      "session": "2024-25",
+      "admissionNo": "WID1121",
+      "bloodGroup": "B-",
+      "cardBatch": "BATCH-5"
+    }
+  ],
+  "BATCH-4": [
+    {
+      "id": 8,
+      "srNo": 1,
+      "imageUploaded": false,
+      "imageName": "",
+      "studentName": "ROHAN SINGH",
+      "fatherName": "VIJAY SINGH",
+      "mobileNo": "9765432109",
+      "address": "CITY CENTER",
+      "class": "V-C",
+      "session": "2023-24",
+      "admissionNo": "WID1122",
+      "bloodGroup": "O-",
+      "cardBatch": "BATCH-4"
+    }
+  ],
+  "2024-2025": [
+    {
+      "id": 9,
+      "srNo": 1,
+      "imageUploaded": true,
+      "imageName": "1003-27977.png",
+      "studentName": "NEHA PATEL",
+      "fatherName": "MOHAN PATEL",
+      "mobileNo": "9654321098",
+      "address": "NEW COLONY",
+      "class": "VIII-A",
+      "session": "2024-25",
+      "admissionNo": "WID1123",
+      "bloodGroup": "A+",
+      "cardBatch": "2024-2025"
+    }
+  ],
+  "2023-2024": [
+    {
+      "id": 10,
+      "srNo": 1,
+      "imageUploaded": true,
+      "imageName": "1003-27976.png",
+      "studentName": "VIKASH YADAV",
+      "fatherName": "SURESH YADAV",
+      "mobileNo": "9543210987",
+      "address": "OLD TOWN",
+      "class": "IX-B",
+      "session": "2023-24",
+      "admissionNo": "WID1124",
+      "bloodGroup": "B+",
+      "cardBatch": "2023-2024"
+    }
+  ]
+}
+

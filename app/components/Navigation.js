@@ -9,14 +9,14 @@ export default function Navigation() {
   return (
     <nav className="bg-white shadow-md border-b border-gray-200">
       {/* Company Name */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6">
+      {/* <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-xl font-bold">Your Company Name</h2>
         </div>
-      </div>
+      </div> */}
       
       {/* Navigation Links */}
-      <div className="max-w-7xl mx-auto px-6 py-4">
+      {/* <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center space-x-6">
           <Link
             href="/"
@@ -39,7 +39,7 @@ export default function Navigation() {
             Files
           </Link>
         </div>
-      </div>
+      </div> */}
     </nav>
   )
 }
