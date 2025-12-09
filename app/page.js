@@ -65,7 +65,7 @@ function UploadPageContent() {
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-3">
             File Upload System
           </h1>
-          <p className="text-gray-600 text-lg">Upload Excel or CSV files securely</p>
+          <p className="text-gray-600 text-lg">Upload Excel, CSV, or ZIP files securely</p>
         </div>
 
         {/* Upload Card */}
@@ -73,7 +73,7 @@ function UploadPageContent() {
           <form onSubmit={handleSubmit}>
             <div className="mb-6">
               <label htmlFor="file" className="block text-sm font-semibold text-gray-700 mb-3">
-                Select File (Excel/CSV only)
+                Select File (Excel/CSV/ZIP)
               </label>
               
               {/* Drag and Drop Area */}
@@ -110,13 +110,13 @@ function UploadPageContent() {
                       browse to upload
                     </label>
                   </div>
-                  <p className="text-sm text-gray-500">Supports .xls, .xlsx, .csv files</p>
+                  <p className="text-sm text-gray-500">Supports .xls, .xlsx, .csv, .zip files</p>
                 </div>
                 <input
                   type="file"
                   id="file"
                   name="file"
-                  accept=".xls,.xlsx,.csv"
+                  accept=".xls,.xlsx,.csv,.zip"
                   required
                   className="hidden"
                 />
