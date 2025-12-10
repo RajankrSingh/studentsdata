@@ -178,26 +178,26 @@ export default function ListUsersPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gradient-to-r from-gray-50 to-blue-50 border-b-2 border-gray-200">
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Sr No</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Profile</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Name</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Email</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Mobile No</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Address</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">User/School Code</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Action</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Sr No</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Profile</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Name</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Mobile No</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Address</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">User/School Code</th>
+                      <th className="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 bg-white">
                     {paginatedUsers.map((user, index) => (
                       <tr key={user.id} className={`transition-all duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-blue-50 hover:shadow-sm`}>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{startIndex + index + 1}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{startIndex + index + 1}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
                           {user.photoUrl ? (
                             <button 
                               onClick={() => handleViewPhoto(user)}
-                              className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                              className="text-blue-600 hover:text-blue-800 font-medium text-sm hover:underline transition-colors"
                             >
                               View Photo
                             </button>
@@ -205,13 +205,13 @@ export default function ListUsersPage() {
                             <span className="text-gray-400">-</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{user.email}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{user.mobileNo || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700 max-w-xs truncate">{user.address || '-'}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{user.userSchoolCode || '-'}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{user.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.mobileNo || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate" title={user.address || ''}>{user.address || '-'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">{user.userSchoolCode || '-'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                          <span className={`inline-block px-3 py-1.5 rounded-full text-xs font-semibold ${
                             user.status === 'Active' 
                               ? 'bg-green-100 text-green-800' 
                               : 'bg-red-100 text-red-800'
@@ -219,17 +219,17 @@ export default function ListUsersPage() {
                             {user.status}
                           </span>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="flex flex-col space-y-1.5">
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <div className="flex items-center justify-center space-x-2">
                             <button 
                               onClick={() => handleEdit(user)}
-                              className="bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
+                              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
                             >
                               Edit
                             </button>
                             <button 
                               onClick={() => handleDelete(user)}
-                              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
+                              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
                             >
                               Delete
                             </button>
@@ -243,28 +243,30 @@ export default function ListUsersPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="px-8 py-4 bg-gradient-to-r from-gray-50 to-blue-50 border-t-2 border-gray-100 flex items-center justify-between">
-                  <div className="text-sm text-gray-700">
-                    Showing <span className="font-bold">{startIndex + 1}</span> to <span className="font-bold">{Math.min(endIndex, filteredUsers.length)}</span> of <span className="font-bold">{filteredUsers.length}</span> entries
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 border-2 border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Previous
-                    </button>
-                    <span className="px-4 py-2 border-2 border-gray-300 rounded-lg bg-white text-gray-700">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 border-2 border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Next
-                    </button>
+                <div className="px-8 py-4 bg-gradient-to-r from-gray-50 to-blue-50 border-t-2 border-gray-100">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="text-sm text-gray-700 font-medium">
+                      Showing <span className="font-bold text-blue-600">{startIndex + 1}</span> to <span className="font-bold text-blue-600">{Math.min(endIndex, filteredUsers.length)}</span> of <span className="font-bold text-gray-900">{filteredUsers.length}</span> entries
+                    </div>
+                    <div className="flex items-center justify-center space-x-2">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 border-2 border-gray-300 rounded-lg bg-white text-gray-700 font-semibold hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
+                      >
+                        Previous
+                      </button>
+                      <span className="px-4 py-2 border-2 border-gray-300 rounded-lg bg-white text-gray-700 font-semibold">
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 border-2 border-gray-300 rounded-lg bg-white text-gray-700 font-semibold hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
+                      >
+                        Next
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

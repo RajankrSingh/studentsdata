@@ -59,9 +59,10 @@ export async function GET(request) {
     }
 
     // Build query - filter by school_id first (required)
+    // Note: Supabase has a default limit of 1000 rows, so we need to explicitly request more
     let query = supabase
       .from('students')
-      .select('*')
+      .select('*', { count: 'exact' })
 
     // If schoolId is provided (either directly or from email lookup), filter by school
     if (finalSchoolId) {
@@ -77,29 +78,63 @@ export async function GET(request) {
       )
     }
 
+    // Helper function to fetch all records in batches (Supabase has 1000 row limit)
+    const fetchAllRecords = async (baseQuery) => {
+      const allRecords = []
+      const batchSize = 1000
+      let start = 0
+      let hasMore = true
+
+      while (hasMore) {
+        const { data: batchData, error: batchError } = await baseQuery
+          .range(start, start + batchSize - 1)
+        
+        if (batchError) {
+          return { data: null, error: batchError }
+        }
+
+        if (!batchData || batchData.length === 0) {
+          hasMore = false
+        } else {
+          allRecords.push(...batchData)
+          start += batchSize
+          // If we got less than batchSize, we've reached the end
+          if (batchData.length < batchSize) {
+            hasMore = false
+          }
+        }
+      }
+
+      return { data: allRecords, error: null }
+    }
+
     // Filter by batch if provided, otherwise include all batches (including null)
     let data, error
+    const schoolIdNum = parseInt(finalSchoolId, 10)
     
     if (batch) {
       // When batch is provided, get students matching batch OR null batch
-      // Use separate queries and combine results for reliability
-      const schoolIdNum = parseInt(finalSchoolId, 10)
+      // Fetch all records using pagination
       
       // Query 1: Students with matching batch
-      const { data: batchData, error: batchError } = await supabase
+      const batchQuery = supabase
         .from('students')
         .select('*')
         .eq('school_id', schoolIdNum)
         .eq('session', batch)
         .order('created_at', { ascending: false })
       
+      const { data: batchData, error: batchError } = await fetchAllRecords(batchQuery)
+      
       // Query 2: Students with null batch
-      const { data: nullBatchData, error: nullBatchError } = await supabase
+      const nullBatchQuery = supabase
         .from('students')
         .select('*')
         .eq('school_id', schoolIdNum)
         .is('session', null)
         .order('created_at', { ascending: false })
+      
+      const { data: nullBatchData, error: nullBatchError } = await fetchAllRecords(nullBatchQuery)
       
       if (batchError || nullBatchError) {
         error = batchError || nullBatchError
@@ -119,7 +154,14 @@ export async function GET(request) {
       }
     } else {
       // If batch is not provided, show all students (including those with null batch)
-      const result = await query.order('created_at', { ascending: false })
+      // Fetch all records using pagination
+      const allStudentsQuery = supabase
+        .from('students')
+        .select('*')
+        .eq('school_id', schoolIdNum)
+        .order('created_at', { ascending: false })
+      
+      const result = await fetchAllRecords(allStudentsQuery)
       data = result.data
       error = result.error
     }

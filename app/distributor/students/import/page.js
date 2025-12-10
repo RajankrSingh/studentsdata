@@ -40,8 +40,10 @@ export default function ImportStudentsPage() {
     const file = e.target.files[0]
     if (file) {
       // Validate file type
-      if (!file.name.endsWith('.csv')) {
-        alert('Please select a CSV file only.')
+      const fileName = file.name.toLowerCase()
+      const isValidFile = fileName.endsWith('.csv') || fileName.endsWith('.xlsx') || fileName.endsWith('.xls')
+      if (!isValidFile) {
+        alert('Please select a CSV or Excel file (.csv, .xlsx, .xls)')
         e.target.value = ''
         return
       }
@@ -76,7 +78,7 @@ Jane Smith,Michael Smith,0987654321,456 Oak Ave,9th,2024-2025,ADM002,B+`
     }
     
     if (!selectedFile) {
-      alert('Please select a CSV file')
+      alert('Please select a CSV or Excel file')
       return
     }
 
@@ -84,7 +86,7 @@ Jane Smith,Michael Smith,0987654321,456 Oak Ave,9th,2024-2025,ADM002,B+`
     
     try {
       const formData = new FormData()
-      formData.append('csv', selectedFile)
+      formData.append('file', selectedFile)
       formData.append('schoolId', selectedSchoolId)
       formData.append('distributor', distributor)
 
@@ -186,18 +188,18 @@ Jane Smith,Michael Smith,0987654321,456 Oak Ave,9th,2024-2025,ADM002,B+`
                 </div>
               </div>
 
-              {/* Upload CSV File */}
+              {/* Upload CSV/Excel File */}
               <div className="md:col-span-2">
-                <label htmlFor="csvFile" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Upload CSV File <span className="text-red-500">*</span>
+                <label htmlFor="fileInput" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Upload CSV or Excel File <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center space-x-4">
                   <label className="flex-1 cursor-pointer">
                     <input
                       type="file"
-                      id="csvFile"
-                      name="csvFile"
-                      accept=".csv"
+                      id="fileInput"
+                      name="fileInput"
+                      accept=".csv,.xlsx,.xls"
                       onChange={handleFileChange}
                       className="hidden"
                     />
