@@ -30,12 +30,37 @@ export default function AddStudentPage() {
     setIsSubmitting(true)
     
     try {
+      // Get schoolId and distributor from localStorage
+      const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
+      
+      if (!userId) {
+        alert('User ID not found. Please login again.')
+        setIsSubmitting(false)
+        return
+      }
+
+      // Fetch user details to get distributor name
+      let distributor = ''
+      try {
+        const userResponse = await fetch(`/api/users/${userId}`)
+        const userResult = await userResponse.json()
+        if (userResult.success && userResult.data) {
+          distributor = userResult.data.distributor || ''
+        }
+      } catch (userError) {
+        console.warn('Could not fetch distributor info:', userError)
+      }
+
       const response = await fetch('/api/students', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          schoolId: userId,
+          distributor: distributor
+        }),
       })
 
       const result = await response.json()

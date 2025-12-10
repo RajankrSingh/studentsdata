@@ -1,50 +1,61 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
+import { createServerClient } from '@/lib/supabaseClient'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    // For now, return a mock count. Later this can be replaced with actual users.json file
-    // or database query
-    const filePath = path.join(process.cwd(), 'data', 'users.json')
-    
-    let totalCount = 0
-    try {
-      if (fs.existsSync(filePath)) {
-        const fileContents = fs.readFileSync(filePath, 'utf8')
-        const usersData = JSON.parse(fileContents)
-        
-        // If it's an array
-        if (Array.isArray(usersData)) {
-          totalCount = usersData.length
-        } 
-        // If it's an object with batches or categories
-        else if (typeof usersData === 'object') {
-          for (const key in usersData) {
-            if (Array.isArray(usersData[key])) {
-              totalCount += usersData[key].length
-            }
-          }
-        }
-      } else {
-        // Return mock count if file doesn't exist
-        totalCount = 6
-      }
-    } catch (error) {
-      // Return mock count on error
-      totalCount = 6
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json(
+        { error: 'Supabase not configured. Please set up environment variables.', count: 0 },
+        { status: 500 }
+      )
     }
 
+    // Create Supabase client
+    const supabase = createServerClient()
+
+    // Count all users in the database
+    const { count, error } = await supabase
+      .from('users')
+      .select('id', { count: 'exact', head: true })
+
+    if (error) {
+      console.error('Supabase count error:', error)
+      // Try alternative method if the first one fails
+      try {
+        const { data, error: altError } = await supabase
+          .from('users')
+          .select('id')
+        
+        if (altError) {
+          throw altError
+        }
+        
+        const altCount = data ? data.length : 0
+        console.log('Using alternative count method, count:', altCount)
+        return NextResponse.json({
+          success: true,
+          count: altCount
+        })
+      } catch (altErr) {
+        return NextResponse.json(
+          { error: 'Failed to fetch users count', details: error.message, count: 0 },
+          { status: 500 }
+        )
+      }
+    }
+
+    console.log('User count from database:', count)
     return NextResponse.json({
       success: true,
-      count: totalCount
+      count: count ?? 0
     })
   } catch (error) {
-    console.error('Error reading users data for count:', error)
+    console.error('Error fetching users count:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch total users count' },
+      { error: 'Failed to fetch users count', details: error.message, count: 0 },
       { status: 500 }
     )
   }

@@ -1,0 +1,417 @@
+'use client'
+
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import AuthGuard from '@/app/components/AuthGuard'
+import DistributorLayout from '@/app/components/DistributorLayout'
+
+function EditUserContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const userId = searchParams.get('id')
+  
+  const [formData, setFormData] = useState({
+    distributor: '',
+    name: '',
+    email: '',
+    password: '',
+    mobileNo: '',
+    address: '',
+    userSchoolCode: '',
+    status: 'Active'
+  })
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    // Get distributor name from localStorage
+    const loginId = typeof window !== 'undefined' ? localStorage.getItem('loginId') : ''
+    setFormData(prev => ({
+      ...prev,
+      distributor: loginId || 'Arhan Creation'
+    }))
+  }, [])
+
+  useEffect(() => {
+    // Fetch user data
+    const fetchUser = async () => {
+      if (!userId) {
+        alert('Invalid user ID')
+        router.push('/distributor/users/list')
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/users/${userId}`)
+        const result = await response.json()
+        
+        if (result.success && result.data) {
+          const user = result.data
+          setFormData({
+            distributor: user.distributor || '',
+            name: user.name || '',
+            email: user.email || '',
+            password: '', // Don't pre-fill password
+            mobileNo: user.mobileNo || '',
+            address: user.address || '',
+            userSchoolCode: user.userSchoolCode || '',
+            status: user.status || 'Active'
+          })
+        } else {
+          alert('User not found')
+          router.push('/distributor/users/list')
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error)
+        alert('Error loading user data')
+        router.push('/distributor/users/list')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchUser()
+  }, [userId, router])
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!validTypes.includes(file.type)) {
+        alert('Please select a JPEG, JPG, or PNG file only.')
+        e.target.value = ''
+        return
+      }
+      
+      // Validate file size (500 KB = 500 * 1024 bytes)
+      const maxSize = 500 * 1024
+      if (file.size > maxSize) {
+        alert('Image size should be less than 500 KB.')
+        e.target.value = ''
+        return
+      }
+      
+      setSelectedFile(file)
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    
+    try {
+      // Prepare update data (only include password if provided)
+      const updateData = { ...formData }
+      if (!updateData.password) {
+        delete updateData.password
+      }
+
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update user')
+      }
+
+      // If photo is selected, upload it
+      if (selectedFile) {
+        const formDataPhoto = new FormData()
+        formDataPhoto.append('photo', selectedFile)
+        formDataPhoto.append('userId', userId)
+
+        try {
+          const photoResponse = await fetch('/api/users/upload-photo', {
+            method: 'POST',
+            body: formDataPhoto
+          })
+
+          if (!photoResponse.ok) {
+            console.warn('User updated but photo upload failed')
+          }
+        } catch (photoError) {
+          console.error('Error uploading photo:', photoError)
+          // Don't fail the whole operation if photo upload fails
+        }
+      }
+
+      alert('User updated successfully!')
+      router.push('/distributor/users/list')
+    } catch (error) {
+      console.error('Error updating user:', error)
+      alert(`Error: ${error.message}`)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="mb-6 flex items-center space-x-3">
+        <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg">
+          <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </div>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Edit User/School</h1>
+      </div>
+
+      {/* Form Card */}
+      <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 px-8 py-6">
+          <h2 className="text-2xl font-bold text-white flex items-center space-x-2">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            <span>Edit User/School</span>
+          </h2>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Distributor */}
+            <div>
+              <label htmlFor="distributor" className="block text-sm font-semibold text-gray-700 mb-2">
+                Distributor <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="distributor"
+                name="distributor"
+                value={formData.distributor}
+                readOnly
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-gray-100 text-gray-600 cursor-not-allowed shadow-sm"
+              />
+            </div>
+
+            {/* Name */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+                Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter Name"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md"
+                required
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                Email <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter Email"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md"
+                required
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                Password <span className="text-gray-500 text-xs">(Leave empty to keep current password)</span>
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter New Password (optional)"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md"
+              />
+            </div>
+
+            {/* Mobile No */}
+            <div>
+              <label htmlFor="mobileNo" className="block text-sm font-semibold text-gray-700 mb-2">
+                Mobile No <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                id="mobileNo"
+                name="mobileNo"
+                value={formData.mobileNo}
+                onChange={handleChange}
+                placeholder="Enter Mobile No"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md"
+                required
+              />
+            </div>
+
+            {/* User/School Code */}
+            <div>
+              <label htmlFor="userSchoolCode" className="block text-sm font-semibold text-gray-700 mb-2">
+                User/School Code <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="userSchoolCode"
+                name="userSchoolCode"
+                value={formData.userSchoolCode}
+                onChange={handleChange}
+                placeholder="Enter User/School Code"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md"
+                required
+              />
+            </div>
+
+            {/* Address */}
+            <div className="md:col-span-2">
+              <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
+                Address <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Enter Address"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md"
+                required
+              />
+            </div>
+
+            {/* Upload Photo */}
+            <div className="md:col-span-2">
+              <label htmlFor="photo" className="block text-sm font-semibold text-gray-700 mb-2">
+                Upload Photo <span className="text-gray-500 text-xs">(Optional - Leave empty to keep current photo)</span>
+              </label>
+              <div className="flex items-center space-x-4">
+                <label className="flex-1 cursor-pointer">
+                  <input
+                    type="file"
+                    id="photo"
+                    name="photo"
+                    accept="image/jpeg,image/jpg,image/png"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <div className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-gray-700 hover:bg-gray-50 transition-colors shadow-sm hover:shadow-md flex items-center justify-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>Choose file</span>
+                  </div>
+                </label>
+                <div className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl bg-gray-50 text-gray-600">
+                  {selectedFile ? selectedFile.name : 'No file chosen'}
+                </div>
+              </div>
+              <p className="mt-2 text-sm text-red-600">
+                Note:- JPEG, JPG, PNG FILES ONLY. MAX IMAGE SIZE SHOULD BE LESS THAN 500 KB
+              </p>
+            </div>
+
+            {/* Status */}
+            <div>
+              <label htmlFor="status" className="block text-sm font-semibold text-gray-700 mb-2">
+                Status <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="status"
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 shadow-sm hover:shadow-md"
+                required
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="mt-8 pt-6 border-t-2 border-gray-100 flex gap-4">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {isSubmitting ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Updating...
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Update User
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/distributor/users/list')}
+              className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
+  )
+}
+
+export default function EditUserPage() {
+  return (
+    <AuthGuard requiredUserType="distributor">
+      <DistributorLayout>
+        <Suspense fallback={
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+          </div>
+        }>
+          <EditUserContent />
+        </Suspense>
+      </DistributorLayout>
+    </AuthGuard>
+  )
+}
+
