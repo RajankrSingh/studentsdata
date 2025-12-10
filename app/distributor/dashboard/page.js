@@ -34,11 +34,19 @@ export default function DistributorDashboard() {
 
     const fetchTotalStudents = async () => {
       try {
-        const response = await fetch('/api/students/count')
+        // Add cache-busting to ensure fresh data
+        const response = await fetch(`/api/students/count?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        })
         const result = await response.json()
         
+        console.log('Student count API response:', result)
+        
         if (result.success) {
-          setTotalStudents(result.count)
+          setTotalStudents(result.count || 0)
         } else {
           console.error('Error fetching students count:', result.error)
           setTotalStudents(0)
@@ -53,6 +61,19 @@ export default function DistributorDashboard() {
 
     fetchTotalUsers()
     fetchTotalStudents()
+    
+    // Refresh count when page becomes visible (user navigates back)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchTotalStudents()
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   return (
@@ -110,15 +131,42 @@ export default function DistributorDashboard() {
                 </svg>
               </div>
             </div>
-            <button 
-              onClick={() => router.push('/distributor/students/list')}
-              className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
-            >
-              <span>View all</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            <div className="flex gap-2 mt-4">
+              <button 
+                onClick={async () => {
+                  setIsLoadingStudents(true)
+                  try {
+                    const response = await fetch(`/api/students/count?t=${Date.now()}`, {
+                      cache: 'no-store'
+                    })
+                    const result = await response.json()
+                    if (result.success) {
+                      setTotalStudents(result.count || 0)
+                    }
+                  } catch (error) {
+                    console.error('Error refreshing count:', error)
+                  } finally {
+                    setIsLoadingStudents(false)
+                  }
+                }}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                title="Refresh count"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Refresh</span>
+              </button>
+              <button 
+                onClick={() => router.push('/distributor/students/list')}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+              >
+                <span>View all</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </DistributorLayout>

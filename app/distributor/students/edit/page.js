@@ -3,13 +3,14 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import AuthGuard from '@/app/components/AuthGuard'
-import SchoolLayout from '@/app/components/SchoolLayout'
+import DistributorLayout from '@/app/components/DistributorLayout'
 
 function EditStudentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const studentId = searchParams.get('id')
   const batch = searchParams.get('batch')
+  const schoolId = searchParams.get('schoolId')
   
   const [formData, setFormData] = useState({
     studentName: '',
@@ -27,55 +28,43 @@ function EditStudentContent() {
   useEffect(() => {
     // Fetch student data
     const fetchStudent = async () => {
-      if (!studentId || !batch) {
-        alert('Invalid student ID or batch')
-        router.push('/school/students/list')
+      if (!studentId) {
+        alert('Invalid student ID')
+        router.push('/distributor/students/list')
         return
       }
 
       try {
-        // Get schoolId from localStorage
-        const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
-        
-        if (!userId) {
-          alert('User ID not found. Please login again.')
-          router.push('/school/students/list')
-          setIsLoading(false)
-          return
-        }
-
-        const response = await fetch(`/api/students?batch=${encodeURIComponent(batch)}&schoolId=${userId}`)
+        const response = await fetch(`/api/students/${studentId}`)
         const result = await response.json()
         
-        if (result.success) {
-          const student = result.data.find(s => s.id === Number(studentId))
-          if (student) {
-            setFormData({
-              studentName: student.studentName || '',
-              fatherName: student.fatherName || '',
-              mobileNo: student.mobileNo || '',
-              address: student.address || '',
-              class: student.class || '',
-              session: student.session || '',
-              admissionNo: student.admissionNo || '',
-              bloodGroup: student.bloodGroup || ''
-            })
-          } else {
-            alert('Student not found')
-            router.push('/school/students/list')
-          }
+        if (result.success && result.data) {
+          const student = result.data
+          setFormData({
+            studentName: student.studentName || '',
+            fatherName: student.fatherName || '',
+            mobileNo: student.mobileNo || '',
+            address: student.address || '',
+            class: student.class || '',
+            session: student.session || '',
+            admissionNo: student.admissionNo || '',
+            bloodGroup: student.bloodGroup || ''
+          })
+        } else {
+          alert('Student not found')
+          router.push('/distributor/students/list')
         }
       } catch (error) {
         console.error('Error fetching student:', error)
         alert('Error loading student data')
-        router.push('/school/students/list')
+        router.push('/distributor/students/list')
       } finally {
         setIsLoading(false)
       }
     }
 
     fetchStudent()
-  }, [studentId, batch, router])
+  }, [studentId, router])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -103,7 +92,7 @@ function EditStudentContent() {
       }
 
       alert('Student updated successfully!')
-      router.push(`/school/students/list`)
+      router.push(`/distributor/students/list`)
     } catch (error) {
       console.error('Error updating student:', error)
       alert(`Error: ${error.message}`)
@@ -309,7 +298,7 @@ function EditStudentContent() {
             </button>
             <button
               type="button"
-              onClick={() => router.push('/school/students/list')}
+              onClick={() => router.push('/distributor/students/list')}
               className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
             >
               Cancel
@@ -323,8 +312,8 @@ function EditStudentContent() {
 
 export default function EditStudentPage() {
   return (
-    <AuthGuard requiredUserType="school">
-      <SchoolLayout>
+    <AuthGuard requiredUserType="distributor">
+      <DistributorLayout>
         <Suspense fallback={
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
@@ -332,7 +321,7 @@ export default function EditStudentPage() {
         }>
           <EditStudentContent />
         </Suspense>
-      </SchoolLayout>
+      </DistributorLayout>
     </AuthGuard>
   )
 }

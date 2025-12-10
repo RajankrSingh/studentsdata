@@ -13,8 +13,22 @@ export default function SchoolDashboard() {
   useEffect(() => {
     const fetchTotalStudents = async () => {
       try {
+        // Get email/loginId from localStorage (preferred) or userId as fallback
+        const email = typeof window !== 'undefined' ? localStorage.getItem('loginId') : null
+        const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
+        
+        if (!email && !userId) {
+          console.error('Email/LoginId or User ID not found in localStorage')
+          setTotalStudents(0)
+          setIsLoading(false)
+          return
+        }
+
+        // Use email if available, otherwise use userId
+        const queryParam = email ? `email=${encodeURIComponent(email)}` : `schoolId=${userId}`
+
         // Add cache-busting to ensure fresh data
-        const response = await fetch(`/api/students/count?t=${Date.now()}`, {
+        const response = await fetch(`/api/students/count?${queryParam}&t=${Date.now()}`, {
           cache: 'no-store',
           headers: {
             'Cache-Control': 'no-cache'
@@ -86,12 +100,17 @@ export default function SchoolDashboard() {
                 onClick={async () => {
                   setIsLoading(true)
                   try {
-                    const response = await fetch(`/api/students/count?t=${Date.now()}`, {
-                      cache: 'no-store'
-                    })
-                    const result = await response.json()
-                    if (result.success) {
-                      setTotalStudents(result.count || 0)
+                    const email = typeof window !== 'undefined' ? localStorage.getItem('loginId') : null
+                    const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
+                    if (email || userId) {
+                      const queryParam = email ? `email=${encodeURIComponent(email)}` : `schoolId=${userId}`
+                      const response = await fetch(`/api/students/count?${queryParam}&t=${Date.now()}`, {
+                        cache: 'no-store'
+                      })
+                      const result = await response.json()
+                      if (result.success) {
+                        setTotalStudents(result.count || 0)
+                      }
                     }
                   } catch (error) {
                     console.error('Error refreshing count:', error)

@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS students (
   blood_group VARCHAR(10) NOT NULL,
   photo_url TEXT,
   photo_name VARCHAR(255),
+  school_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+  distributor VARCHAR(255),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -25,6 +27,9 @@ CREATE INDEX IF NOT EXISTS idx_students_mobile_no ON students(mobile_no);
 
 -- Create an index on created_at for sorting
 CREATE INDEX IF NOT EXISTS idx_students_created_at ON students(created_at DESC);
+
+-- Create an index on school_id for faster lookups
+CREATE INDEX IF NOT EXISTS idx_students_school_id ON students(school_id);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE students ENABLE ROW LEVEL SECURITY;
@@ -69,6 +74,8 @@ COMMENT ON COLUMN students.admission_no IS 'Unique admission number';
 COMMENT ON COLUMN students.blood_group IS 'Student''s blood group';
 COMMENT ON COLUMN students.photo_url IS 'URL of the student photo stored in Supabase Storage';
 COMMENT ON COLUMN students.photo_name IS 'Original filename of the uploaded photo';
+COMMENT ON COLUMN students.school_id IS 'Reference to the user/school this student belongs to';
+COMMENT ON COLUMN students.distributor IS 'Distributor name';
 COMMENT ON COLUMN students.created_at IS 'Record creation timestamp';
 COMMENT ON COLUMN students.updated_at IS 'Record last update timestamp';
 

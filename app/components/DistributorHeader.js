@@ -29,7 +29,9 @@ export default function DistributorHeader({ onMenuClick }) {
       }
     } else if (pathname?.startsWith('/distributor/students')) {
       breadcrumbs.push({ name: 'Manage Students', path: '/distributor/students/list' })
-      if (pathname?.includes('/add')) {
+      if (pathname?.includes('/import')) {
+        breadcrumbs.push({ name: 'Import Students', path: '/distributor/students/import' })
+      } else if (pathname?.includes('/add')) {
         breadcrumbs.push({ name: 'Add Student', path: '/distributor/students/add' })
       } else if (pathname?.includes('/edit')) {
         breadcrumbs.push({ name: 'Edit Student', path: pathname })

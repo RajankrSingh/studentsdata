@@ -3,11 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-const SCHOOL_PASSWORD = 'school123' // Change this to your desired password
-
 export default function SchoolLogin() {
   const [password, setPassword] = useState('')
-  const [loginId, setLoginId] = useState('')
+  const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -22,28 +20,82 @@ export default function SchoolLogin() {
     }
   }, [router])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setIsLoading(true)
 
-    // Validate login ID and password
-    if (!loginId.trim()) {
-      setError('Please enter your School Login ID')
+    // Validate email and password
+    if (!email.trim()) {
+      setError('Please enter your email address')
       setIsLoading(false)
       return
     }
 
-    if (password === SCHOOL_PASSWORD) {
-      // Store authentication and user type
-      localStorage.setItem('isAuthenticated', 'true')
-      localStorage.setItem('userType', 'school')
-      localStorage.setItem('loginId', loginId.trim())
+    if (!password.trim()) {
+      setError('Please enter your password')
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      // Call login API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password
+        }),
+      })
+
+      // Check if response is JSON
+      let result
+      const contentType = response.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
+        result = await response.json()
+      } else {
+        const text = await response.text()
+        throw new Error(`Server error: ${text || 'Invalid response format'}`)
+      }
+
+      if (!response.ok) {
+        // Check for token-related errors in the response
+        const errorMsg = result.error || 'Login failed'
+        if (errorMsg.includes('token') || errorMsg.includes('Token') || errorMsg.includes('authentication')) {
+          throw new Error('Authentication service error. Please contact administrator.')
+        }
+        throw new Error(errorMsg)
+      }
+
+      if (result.success && result.user) {
+        // Store authentication and user data
+        localStorage.setItem('isAuthenticated', 'true')
+        localStorage.setItem('userType', 'school')
+        localStorage.setItem('loginId', result.user.email)
+        localStorage.setItem('userId', result.user.id.toString())
+        localStorage.setItem('userName', result.user.name)
+        localStorage.setItem('userSchoolCode', result.user.userSchoolCode || '')
+        
+        // Redirect to school dashboard
+        router.push('/school/dashboard')
+      } else {
+        throw new Error('Invalid response from server')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
       
-      // Redirect to school dashboard
-      router.push('/school/dashboard')
-    } else {
-      setError('Incorrect password. Please try again.')
+      // Handle network errors
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        setError('Network error. Please check your internet connection and try again.')
+      } else if (error.message && (error.message.includes('token') || error.message.includes('Token') || error.message.includes('authentication'))) {
+        setError('Authentication service error. Please try again or contact administrator.')
+      } else {
+        setError(error.message || 'Invalid email or password. Please try again.')
+      }
+      
       setPassword('')
       setIsLoading(false)
     }
@@ -67,16 +119,16 @@ export default function SchoolLogin() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="loginId" className="block text-sm font-semibold text-gray-700 mb-2">
-                School Login ID
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                Email Address
               </label>
               <input
-                type="text"
-                id="loginId"
-                value={loginId}
-                onChange={(e) => setLoginId(e.target.value)}
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="input-field w-full"
-                placeholder="Enter your School Login ID"
+                placeholder="Enter your email address"
                 required
                 autoFocus
               />

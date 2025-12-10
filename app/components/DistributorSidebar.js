@@ -59,6 +59,7 @@ export default function DistributorSidebar({ isOpen }) {
       ),
       hasArrow: true,
       submenu: [
+        { name: 'Import Students', path: '/distributor/students/import' },
         { name: 'Add Student', path: '/distributor/students/add' },
         { name: 'List Students', path: '/distributor/students/list' },
       ],

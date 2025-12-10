@@ -125,7 +125,7 @@
       "cardBatch": "BATCH-4"
     }
   ],
-  "2024-2025": [
+  "2024-25": [
     {
       "id": 9,
       "srNo": 1,
@@ -139,7 +139,7 @@
       "session": "2024-25",
       "admissionNo": "WID1123",
       "bloodGroup": "A+",
-      "cardBatch": "2024-2025"
+      "cardBatch": "2024-25"
     }
   ],
   "2023-2024": [

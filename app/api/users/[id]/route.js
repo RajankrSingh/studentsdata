@@ -1,16 +1,22 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabaseClient'
+import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
-// GET single student by ID
+// Hash password function
+function hashPassword(password) {
+  return crypto.createHash('sha256').update(password).digest('hex')
+}
+
+// GET single user by ID
 export async function GET(request, { params }) {
   try {
     const { id } = await params
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Student ID is required' },
+        { error: 'User ID is required' },
         { status: 400 }
       )
     }
@@ -26,9 +32,9 @@ export async function GET(request, { params }) {
     // Create Supabase client
     const supabase = createServerClient()
 
-    // Fetch student from database
+    // Fetch user from database
     const { data, error } = await supabase
-      .from('students')
+      .from('users')
       .select('*')
       .eq('id', id)
       .single()
@@ -36,14 +42,14 @@ export async function GET(request, { params }) {
     if (error) {
       console.error('Supabase fetch error:', error)
       return NextResponse.json(
-        { error: 'Failed to fetch student data', details: error.message },
+        { error: 'Failed to fetch user data', details: error.message },
         { status: 500 }
       )
     }
 
     if (!data) {
       return NextResponse.json(
-        { error: 'Student not found' },
+        { error: 'User not found' },
         { status: 404 }
       )
     }
@@ -51,18 +57,15 @@ export async function GET(request, { params }) {
     // Map database column names (snake_case) to frontend format (camelCase)
     const mappedData = {
       id: data.id,
-      studentName: data.student_name,
-      fatherName: data.father_name,
+      distributor: data.distributor,
+      name: data.name,
+      email: data.email,
       mobileNo: data.mobile_no,
       address: data.address,
-      class: data.class,
-      session: data.session,
-      admissionNo: data.admission_no,
-      bloodGroup: data.blood_group,
+      userSchoolCode: data.user_school_code,
       photoUrl: data.photo_url,
       photoName: data.photo_name,
-      imageUploaded: !!data.photo_url,
-      imageName: data.photo_name,
+      status: data.status,
       created_at: data.created_at,
       updated_at: data.updated_at
     }
@@ -72,22 +75,22 @@ export async function GET(request, { params }) {
       data: mappedData
     })
   } catch (error) {
-    console.error('Error fetching student data:', error)
+    console.error('Error fetching user data:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch student data', details: error.message },
+      { error: 'Failed to fetch user data', details: error.message },
       { status: 500 }
     )
   }
 }
 
-// PUT/PATCH - Update student
+// PUT/PATCH - Update user
 export async function PUT(request, { params }) {
   try {
     const { id } = await params
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Student ID is required' },
+        { error: 'User ID is required' },
         { status: 400 }
       )
     }
@@ -102,20 +105,20 @@ export async function PUT(request, { params }) {
 
     const body = await request.json()
     const { 
-      studentName, 
-      fatherName, 
-      mobileNo, 
-      address, 
-      class: studentClass, 
-      session, 
-      admissionNo, 
-      bloodGroup 
+      distributor,
+      name,
+      email,
+      password,
+      mobileNo,
+      address,
+      userSchoolCode,
+      status
     } = body
 
     // Validate required fields
-    if (!studentName || !fatherName || !mobileNo || !address || !studentClass || !session || !admissionNo || !bloodGroup) {
+    if (!distributor || !name || !email) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'Distributor, Name, and Email are required' },
         { status: 400 }
       )
     }
@@ -123,60 +126,84 @@ export async function PUT(request, { params }) {
     // Create Supabase client
     const supabase = createServerClient()
 
-    // Update student data in database
+    // Prepare update data
+    const updateData = {
+      distributor: distributor,
+      name: name,
+      email: email.toLowerCase().trim(),
+      mobile_no: mobileNo || null,
+      address: address || null,
+      user_school_code: userSchoolCode || null,
+      status: status || 'Active',
+      updated_at: new Date().toISOString()
+    }
+
+    // Only update password if provided
+    if (password) {
+      updateData.password = hashPassword(password)
+    }
+
+    // Update user data in database
     const { data, error } = await supabase
-      .from('students')
-      .update({
-        student_name: studentName,
-        father_name: fatherName,
-        mobile_no: mobileNo,
-        address: address,
-        class: studentClass,
-        session: session,
-        admission_no: admissionNo,
-        blood_group: bloodGroup,
-        updated_at: new Date().toISOString()
-      })
+      .from('users')
+      .update(updateData)
       .eq('id', id)
       .select()
 
     if (error) {
       console.error('Supabase update error:', error)
+      
+      // Handle unique constraint violations
+      if (error.code === '23505') {
+        if (error.message.includes('email')) {
+          return NextResponse.json(
+            { error: 'Email already exists. Please use a different email.' },
+            { status: 400 }
+          )
+        }
+        if (error.message.includes('user_school_code')) {
+          return NextResponse.json(
+            { error: 'User/School code already exists. Please use a different code.' },
+            { status: 400 }
+          )
+        }
+      }
+      
       return NextResponse.json(
-        { error: 'Failed to update student data', details: error.message },
+        { error: 'Failed to update user data', details: error.message },
         { status: 500 }
       )
     }
 
     if (!data || data.length === 0) {
       return NextResponse.json(
-        { error: 'Student not found' },
+        { error: 'User not found' },
         { status: 404 }
       )
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Student updated successfully',
+      message: 'User updated successfully',
       data: data[0]
     })
   } catch (error) {
-    console.error('Error updating student data:', error)
+    console.error('Error updating user data:', error)
     return NextResponse.json(
-      { error: 'Failed to update student data', details: error.message },
+      { error: 'Failed to update user data', details: error.message },
       { status: 500 }
     )
   }
 }
 
-// DELETE - Delete student
+// DELETE - Delete user
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params
 
     if (!id) {
       return NextResponse.json(
-        { error: 'Student ID is required' },
+        { error: 'User ID is required' },
         { status: 400 }
       )
     }
@@ -192,33 +219,33 @@ export async function DELETE(request, { params }) {
     // Create Supabase client
     const supabase = createServerClient()
 
-    // First, check if student exists and get photo info for cleanup
-    const { data: studentData } = await supabase
-      .from('students')
+    // First, check if user exists and get photo info for cleanup
+    const { data: userData } = await supabase
+      .from('users')
       .select('photo_url')
       .eq('id', id)
       .single()
 
-    // Delete student from database
+    // Delete user from database
     const { error } = await supabase
-      .from('students')
+      .from('users')
       .delete()
       .eq('id', id)
 
     if (error) {
       console.error('Supabase delete error:', error)
       return NextResponse.json(
-        { error: 'Failed to delete student', details: error.message },
+        { error: 'Failed to delete user', details: error.message },
         { status: 500 }
       )
     }
 
-    // If student had a photo, delete it from storage
-    if (studentData?.photo_url) {
+    // If user had a photo, delete it from storage
+    if (userData?.photo_url) {
       try {
-        const photoPath = studentData.photo_url.split('/').pop()
+        const photoPath = userData.photo_url.split('/').pop()
         await supabase.storage
-          .from('student-photos')
+          .from('user-photos')
           .remove([photoPath])
       } catch (storageError) {
         console.error('Error deleting photo from storage:', storageError)
@@ -228,12 +255,12 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: 'Student deleted successfully'
+      message: 'User deleted successfully'
     })
   } catch (error) {
-    console.error('Error deleting student:', error)
+    console.error('Error deleting user:', error)
     return NextResponse.json(
-      { error: 'Failed to delete student', details: error.message },
+      { error: 'Failed to delete user', details: error.message },
       { status: 500 }
     )
   }
