@@ -80,18 +80,23 @@ function EditStudentContent() {
     setIsSubmitting(true)
     
     try {
-      // TODO: Implement API call to update student data
-      // const response = await fetch(`/api/students/${studentId}`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ ...formData, batch })
-      // })
-      
+      const response = await fetch(`/api/students/${studentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update student')
+      }
+
       alert('Student updated successfully!')
       router.push(`/school/students/list`)
     } catch (error) {
       console.error('Error updating student:', error)
-      alert('Error updating student')
+      alert(`Error: ${error.message}`)
     } finally {
       setIsSubmitting(false)
     }

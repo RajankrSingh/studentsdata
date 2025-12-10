@@ -87,31 +87,32 @@ export default function ListStudentsPage() {
       const file = e.target.files[0]
       if (!file) return
 
-      // TODO: Implement actual photo upload API
       const formData = new FormData()
       formData.append('photo', file)
       formData.append('studentId', student.id)
-      formData.append('batch', selectedBatch)
 
       try {
-        // Simulate upload
-        alert(`Uploading photo for ${student.studentName}...`)
-        // In real implementation:
-        // const response = await fetch('/api/students/upload-photo', {
-        //   method: 'POST',
-        //   body: formData
-        // })
-        
+        const response = await fetch('/api/students/upload-photo', {
+          method: 'POST',
+          body: formData
+        })
+
+        const result = await response.json()
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to upload photo')
+        }
+
         // Update local state
         setStudents(students.map(s => 
           s.id === student.id 
-            ? { ...s, imageUploaded: true, imageName: file.name }
+            ? { ...s, imageUploaded: true, imageName: result.data.photoName, photoUrl: result.data.photoUrl }
             : s
         ))
         alert('Photo uploaded successfully!')
       } catch (error) {
         console.error('Error uploading photo:', error)
-        alert('Error uploading photo')
+        alert(`Error: ${error.message}`)
       }
     }
     input.click()
@@ -123,15 +124,17 @@ export default function ListStudentsPage() {
     }
 
     try {
-      // TODO: Implement actual delete API
-      // const response = await fetch(`/api/students/${student.id}?batch=${selectedBatch}`, {
-      //   method: 'DELETE'
-      // })
-      
+      const response = await fetch(`/api/students/${student.id}`, {
+        method: 'DELETE'
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete student')
+      }
+
       // Remove from local state
-      setStudents(students.filter(s => s.id !== student.id))
-      
-      // Update serial numbers
       const updatedStudents = students
         .filter(s => s.id !== student.id)
         .map((s, index) => ({ ...s, srNo: index + 1 }))
@@ -140,13 +143,17 @@ export default function ListStudentsPage() {
       alert(`${student.studentName} deleted successfully!`)
     } catch (error) {
       console.error('Error deleting student:', error)
-      alert('Error deleting student')
+      alert(`Error: ${error.message}`)
     }
   }
 
   const handleViewPhoto = (student) => {
-    // TODO: Implement photo viewing modal or navigate to photo view page
-    alert(`Viewing photo for ${student.studentName}\nImage: ${student.imageName}`)
+    if (student.photoUrl) {
+      // Open photo in new window
+      window.open(student.photoUrl, '_blank')
+    } else {
+      alert('No photo available for this student')
+    }
   }
 
   const filteredStudents = students.filter(student => {
@@ -207,8 +214,8 @@ export default function ListStudentsPage() {
                     <option value="BATCH-6">BATCH-6</option>
                     <option value="BATCH-5">BATCH-5</option>
                     <option value="BATCH-4">BATCH-4</option>
-                    <option value="2024-2025">2024-2025</option>
-                    <option value="2023-2024">2023-2024</option>
+                    <option value="2024-25">2024-25</option>
+                    <option value="2023-24">2023-24</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

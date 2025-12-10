@@ -29,12 +29,23 @@ export default function AddStudentPage() {
     e.preventDefault()
     setIsSubmitting(true)
     
-    // TODO: Implement API call to save student data
-    console.log('Form Data:', formData)
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/students', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save student data')
+      }
+
       alert('Student added successfully!')
+      
       // Reset form
       setFormData({
         studentName: '',
@@ -46,8 +57,12 @@ export default function AddStudentPage() {
         admissionNo: '',
         bloodGroup: ''
       })
+    } catch (error) {
+      console.error('Error saving student:', error)
+      alert(`Error: ${error.message}`)
+    } finally {
       setIsSubmitting(false)
-    }, 1000)
+    }
   }
 
   return (
