@@ -81,29 +81,29 @@ export default function DistributorSidebar({ isOpen }) {
   ]
 
   return (
-    <aside className={`fixed left-0 top-0 h-screen w-64 bg-gray-900 text-white z-30 transition-transform duration-300 lg:translate-x-0 ${
+    <aside className={`fixed left-0 top-0 h-screen w-72 bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 text-white z-30 transition-transform duration-300 ease-in-out lg:translate-x-0 shadow-2xl ${
       isOpen ? 'translate-x-0' : '-translate-x-full'
     }`}>
       <div className="flex flex-col h-full overflow-hidden">
         {/* Logo Section */}
-        <div className="p-6 border-b border-gray-700 flex-shrink-0">
-          <div className="w-12 h-12 bg-yellow-400 rounded-lg flex items-center justify-center mb-4">
+        <div className="p-6 border-b border-gray-700/50 flex-shrink-0 bg-gradient-to-r from-gray-900 to-gray-800">
+          <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 via-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mb-4 shadow-lg transform hover:scale-105 transition-transform duration-200">
             <svg className="w-8 h-8 text-gray-900" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
             </svg>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-md ring-2 ring-blue-400/30">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
-            <span className="text-sm font-medium">{loginId || 'Arhan Creation'}</span>
+            <span className="text-sm font-semibold text-gray-100 truncate">{loginId || 'Arhan Creation'}</span>
           </div>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto overflow-x-hidden">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
           {menuItems.map((item) => {
             const isActive = pathname === item.path
             const isManageUsers = item.name === 'Manage Users / Schools'
@@ -125,24 +125,26 @@ export default function DistributorSidebar({ isOpen }) {
                       router.push(item.path)
                     }
                   }}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group min-w-0 ${
                     isActive || isSubmenuActive
-                      ? 'bg-gray-800 text-white'
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
+                      : 'text-gray-300 hover:bg-gray-800/70 hover:text-white hover:translate-x-1'
                   }`}
                 >
-                  <div className="flex items-center space-x-3">
-                    {item.icon}
-                    <span className="font-medium">{item.name}</span>
+                  <div className="flex items-center space-x-3 min-w-0 flex-1">
+                    <div className={`flex-shrink-0 ${isActive || isSubmenuActive ? 'text-white' : 'text-gray-400 group-hover:text-white'} transition-colors`}>
+                      {item.icon}
+                    </div>
+                    <span className={`font-medium whitespace-nowrap ${isActive || isSubmenuActive ? 'text-white' : 'text-gray-300 group-hover:text-white'} transition-colors`}>{item.name}</span>
                   </div>
                   {item.hasArrow && (
                     <svg 
-                      className={`w-4 h-4 transition-transform ${
+                      className={`w-4 h-4 transition-transform duration-200 flex-shrink-0 ml-2 ${
                         (isManageUsers && manageUsersOpen) || 
                         (isManageStudents && manageStudentsOpen) || 
                         (isSettings && settingsOpen)
                           ? 'rotate-180' : ''
-                      }`}
+                      } ${isActive || isSubmenuActive ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
@@ -154,21 +156,25 @@ export default function DistributorSidebar({ isOpen }) {
                 
                 {/* Submenu for Manage Users */}
                 {isManageUsers && manageUsersOpen && item.submenu && (
-                  <div className="mt-2 ml-4 space-y-1">
+                  <div className="mt-2 ml-6 space-y-1 animate-in slide-in-from-top-2 duration-200">
                     {item.submenu.map((subItem) => {
                       const isSubActive = pathname === subItem.path
                       return (
                         <button
                           key={subItem.path}
                           onClick={() => router.push(subItem.path)}
-                          className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
+                          className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm group ${
                             isSubActive
-                              ? 'bg-gray-800 text-white'
-                              : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                              ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-white border-l-2 border-blue-500'
+                              : 'text-gray-400 hover:bg-gray-800/50 hover:text-white hover:translate-x-1'
                           }`}
                         >
-                          <div className="w-2 h-2 rounded-full border border-current"></div>
-                          <span>{subItem.name}</span>
+                          <div className={`w-1.5 h-1.5 rounded-full transition-all ${
+                            isSubActive 
+                              ? 'bg-blue-400 shadow-sm shadow-blue-400/50' 
+                              : 'bg-gray-500 group-hover:bg-blue-400'
+                          }`}></div>
+                          <span className="font-medium">{subItem.name}</span>
                         </button>
                       )
                     })}
@@ -177,21 +183,25 @@ export default function DistributorSidebar({ isOpen }) {
                 
                 {/* Submenu for Manage Students */}
                 {isManageStudents && manageStudentsOpen && item.submenu && (
-                  <div className="mt-2 ml-4 space-y-1">
+                  <div className="mt-2 ml-6 space-y-1 animate-in slide-in-from-top-2 duration-200">
                     {item.submenu.map((subItem) => {
                       const isSubActive = pathname === subItem.path
                       return (
                         <button
                           key={subItem.path}
                           onClick={() => router.push(subItem.path)}
-                          className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
+                          className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm group ${
                             isSubActive
-                              ? 'bg-gray-800 text-white'
-                              : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                              ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-white border-l-2 border-blue-500'
+                              : 'text-gray-400 hover:bg-gray-800/50 hover:text-white hover:translate-x-1'
                           }`}
                         >
-                          <div className="w-2 h-2 rounded-full border border-current"></div>
-                          <span>{subItem.name}</span>
+                          <div className={`w-1.5 h-1.5 rounded-full transition-all ${
+                            isSubActive 
+                              ? 'bg-blue-400 shadow-sm shadow-blue-400/50' 
+                              : 'bg-gray-500 group-hover:bg-blue-400'
+                          }`}></div>
+                          <span className="font-medium">{subItem.name}</span>
                         </button>
                       )
                     })}
@@ -200,21 +210,25 @@ export default function DistributorSidebar({ isOpen }) {
                 
                 {/* Submenu for Settings */}
                 {isSettings && settingsOpen && item.submenu && (
-                  <div className="mt-2 ml-4 space-y-1">
+                  <div className="mt-2 ml-6 space-y-1 animate-in slide-in-from-top-2 duration-200">
                     {item.submenu.map((subItem) => {
                       const isSubActive = pathname === subItem.path
                       return (
                         <button
                           key={subItem.path}
                           onClick={() => router.push(subItem.path)}
-                          className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
+                          className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm group ${
                             isSubActive
-                              ? 'bg-gray-800 text-white'
-                              : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                              ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-white border-l-2 border-blue-500'
+                              : 'text-gray-400 hover:bg-gray-800/50 hover:text-white hover:translate-x-1'
                           }`}
                         >
-                          <div className="w-2 h-2 rounded-full border border-current"></div>
-                          <span>{subItem.name}</span>
+                          <div className={`w-1.5 h-1.5 rounded-full transition-all ${
+                            isSubActive 
+                              ? 'bg-blue-400 shadow-sm shadow-blue-400/50' 
+                              : 'bg-gray-500 group-hover:bg-blue-400'
+                          }`}></div>
+                          <span className="font-medium">{subItem.name}</span>
                         </button>
                       )
                     })}

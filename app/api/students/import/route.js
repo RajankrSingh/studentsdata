@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabaseClient'
+import * as XLSX from 'xlsx'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,37 +15,88 @@ export async function POST(request) {
     }
 
     const formData = await request.formData()
-    const csvFile = formData.get('csv')
+    const file = formData.get('file')
     const schoolId = formData.get('schoolId')
     const distributor = formData.get('distributor')
 
-    if (!csvFile || !schoolId || !distributor) {
+    if (!file || !schoolId || !distributor) {
       return NextResponse.json(
-        { error: 'CSV file, School ID, and Distributor are required' },
+        { error: 'File, School ID, and Distributor are required' },
         { status: 400 }
       )
     }
 
-    // Read CSV file
-    const text = await csvFile.text()
-    const lines = text.split('\n').filter(line => line.trim())
-    
-    if (lines.length < 2) {
+    // Determine file type
+    const fileName = file.name.toLowerCase()
+    const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls')
+    const isCSV = fileName.endsWith('.csv')
+
+    if (!isExcel && !isCSV) {
       return NextResponse.json(
-        { error: 'CSV file must have at least a header row and one data row' },
+        { error: 'Only CSV and Excel files (.csv, .xlsx, .xls) are supported' },
         { status: 400 }
       )
+    }
+
+    let rows = []
+
+    if (isExcel) {
+      // Parse Excel file
+      const arrayBuffer = await file.arrayBuffer()
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' })
+      const firstSheetName = workbook.SheetNames[0]
+      const worksheet = workbook.Sheets[firstSheetName]
+      rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' })
+      
+      if (rows.length < 2) {
+        return NextResponse.json(
+          { error: 'Excel file must have at least a header row and one data row' },
+          { status: 400 }
+        )
+      }
+    } else {
+      // Parse CSV file
+      const text = await file.text()
+      const lines = text.split('\n').filter(line => line.trim())
+      
+      if (lines.length < 2) {
+        return NextResponse.json(
+          { error: 'CSV file must have at least a header row and one data row' },
+          { status: 400 }
+        )
+      }
+
+      rows = lines.map(line => {
+        // Handle CSV with quoted values
+        const values = []
+        let current = ''
+        let inQuotes = false
+        
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i]
+          if (char === '"') {
+            inQuotes = !inQuotes
+          } else if (char === ',' && !inQuotes) {
+            values.push(current.trim())
+            current = ''
+          } else {
+            current += char
+          }
+        }
+        values.push(current.trim())
+        return values
+      })
     }
 
     // Parse header
-    const headers = lines[0].split(',').map(h => h.trim())
+    const headers = rows[0].map(h => String(h).trim())
     
     // Expected headers
     const expectedHeaders = ['Student Name', 'Father Name', 'Mobile No', 'Address', 'Class', 'Session', 'Admission No', 'Blood Group']
     const headerMap = {}
     
-    expectedHeaders.forEach(expectedHeader => {
-      const index = headers.findIndex(h => h.toLowerCase() === expectedHeader.toLowerCase())
+    for (const expectedHeader of expectedHeaders) {
+      const index = headers.findIndex(h => String(h).toLowerCase() === expectedHeader.toLowerCase())
       if (index === -1) {
         return NextResponse.json(
           { error: `Missing required column: ${expectedHeader}` },
@@ -52,14 +104,17 @@ export async function POST(request) {
         )
       }
       headerMap[expectedHeader] = index
-    })
+    }
 
     // Parse data rows
     const students = []
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim())
+    for (let i = 1; i < rows.length; i++) {
+      const values = rows[i].map(v => String(v).trim())
       
       if (values.length < expectedHeaders.length) continue
+      
+      // Skip empty rows
+      if (values.every(v => !v || v === '')) continue
       
       // Convert schoolId to number for consistency
       const schoolIdNum = parseInt(schoolId, 10)
@@ -81,7 +136,7 @@ export async function POST(request) {
 
     if (students.length === 0) {
       return NextResponse.json(
-        { error: 'No valid student data found in CSV file' },
+        { error: 'No valid student data found in file' },
         { status: 400 }
       )
     }

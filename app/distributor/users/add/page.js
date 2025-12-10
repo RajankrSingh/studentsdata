@@ -139,7 +139,7 @@ export default function AddUserPage() {
           <form onSubmit={handleSubmit} className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Distributor */}
-              <div>
+              <div className="flex flex-col">
                 <label htmlFor="distributor" className="block text-sm font-semibold text-gray-700 mb-2">
                   Distributor <span className="text-red-500">*</span>
                 </label>
@@ -154,7 +154,7 @@ export default function AddUserPage() {
               </div>
 
               {/* Name */}
-              <div>
+              <div className="flex flex-col">
                 <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
                   Name <span className="text-red-500">*</span>
                 </label>
@@ -171,7 +171,7 @@ export default function AddUserPage() {
               </div>
 
               {/* Email */}
-              <div>
+              <div className="flex flex-col">
                 <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
                   Email <span className="text-red-500">*</span>
                 </label>
@@ -188,7 +188,7 @@ export default function AddUserPage() {
               </div>
 
               {/* Password */}
-              <div>
+              <div className="flex flex-col">
                 <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
                   Password <span className="text-red-500">*</span>
                 </label>
@@ -205,7 +205,7 @@ export default function AddUserPage() {
               </div>
 
               {/* Mobile No */}
-              <div>
+              <div className="flex flex-col">
                 <label htmlFor="mobileNo" className="block text-sm font-semibold text-gray-700 mb-2">
                   Mobile No <span className="text-red-500">*</span>
                 </label>
@@ -222,7 +222,7 @@ export default function AddUserPage() {
               </div>
 
               {/* User/School Code */}
-              <div>
+              <div className="flex flex-col">
                 <label htmlFor="userSchoolCode" className="block text-sm font-semibold text-gray-700 mb-2">
                   User/School Code <span className="text-red-500">*</span>
                 </label>
@@ -238,7 +238,7 @@ export default function AddUserPage() {
               </div>
 
               {/* Address */}
-              <div className="md:col-span-2">
+              <div className="md:col-span-2 flex flex-col">
                 <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
                   Address <span className="text-red-500">*</span>
                 </label>
@@ -255,7 +255,7 @@ export default function AddUserPage() {
               </div>
 
               {/* Upload Photo */}
-              <div className="md:col-span-2">
+              <div className="md:col-span-2 flex flex-col">
                 <label htmlFor="photo" className="block text-sm font-semibold text-gray-700 mb-2">
                   Upload Photo <span className="text-red-500">*</span>
                 </label>
@@ -276,17 +276,17 @@ export default function AddUserPage() {
                       <span>Choose file</span>
                     </div>
                   </label>
-                  <div className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl bg-gray-50 text-gray-600">
+                  <div className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl bg-gray-50 text-gray-600 min-h-[48px] flex items-center">
                     {selectedFile ? selectedFile.name : 'No file chosen'}
                   </div>
                 </div>
-                <p className="mt-2 text-sm text-red-600">
+                <p className="mt-2 text-sm text-red-600 font-medium">
                   Note:- JPEG, JPG, PNG FILES ONLY. MAX IMAGE SIZE SHOULD BE LESS THAN 500 KB
                 </p>
               </div>
 
               {/* Status */}
-              <div>
+              <div className="flex flex-col">
                 <label htmlFor="status" className="block text-sm font-semibold text-gray-700 mb-2">
                   Status <span className="text-red-500">*</span>
                 </label>
@@ -305,11 +305,11 @@ export default function AddUserPage() {
             </div>
 
             {/* Submit Button */}
-            <div className="mt-8 pt-6 border-t-2 border-gray-100">
+            <div className="mt-8 pt-6 border-t-2 border-gray-100 flex justify-start">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full md:w-auto md:min-w-[200px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">

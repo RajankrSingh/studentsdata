@@ -41,7 +41,7 @@ export default function DistributorLayout({ children }) {
       )}
       
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col lg:ml-64 w-full overflow-hidden">
+      <div className="flex-1 flex flex-col lg:ml-72 w-full overflow-hidden">
         {/* Header */}
         <DistributorHeader onMenuClick={toggleSidebar} />
         

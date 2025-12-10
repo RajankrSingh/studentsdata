@@ -15,9 +15,10 @@ export default function DistributorListStudentsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [isDownloadingImages, setIsDownloadingImages] = useState(false)
-  const [showEntries, setShowEntries] = useState(100)
+  const [showEntries, setShowEntries] = useState(25)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRows, setSelectedRows] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     // Get distributor name from localStorage
@@ -385,6 +386,33 @@ export default function DistributorListStudentsPage() {
     )
   })
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredStudents.length / showEntries)
+  const startIndex = (currentPage - 1) * showEntries
+  const endIndex = startIndex + showEntries
+  const paginatedStudents = filteredStudents.slice(startIndex, endIndex)
+
+  // Reset to page 1 when search query or showEntries changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, showEntries])
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+  }
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
   return (
     <AuthGuard requiredUserType="distributor">
       <DistributorLayout>
@@ -656,9 +684,9 @@ export default function DistributorListStudentsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 bg-white">
-                  {filteredStudents.map((student, index) => (
+                  {paginatedStudents.map((student, index) => (
                     <tr key={student.id} className={`transition-all duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-blue-50 hover:shadow-sm`}>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{student.srNo}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{startIndex + index + 1}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <input
                           type="checkbox"
@@ -723,11 +751,72 @@ export default function DistributorListStudentsPage() {
             </div>
           )}
 
-          {/* Table Footer Info */}
+          {/* Table Footer Info and Pagination */}
           {students.length > 0 && (
-            <div className="px-8 py-4 bg-gradient-to-r from-gray-50 to-blue-50 border-t-2 border-gray-100 text-sm text-gray-700 font-medium">
-              <div className="flex items-center justify-between">
-                <span>Showing <span className="font-bold text-blue-600">{filteredStudents.length}</span> of <span className="font-bold text-gray-900">{students.length}</span> entries</span>
+            <div className="px-8 py-4 bg-gradient-to-r from-gray-50 to-blue-50 border-t-2 border-gray-100">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="text-sm text-gray-700 font-medium">
+                  <span>Showing <span className="font-bold text-blue-600">{filteredStudents.length === 0 ? 0 : startIndex + 1}</span> to <span className="font-bold text-blue-600">{Math.min(endIndex, filteredStudents.length)}</span> of <span className="font-bold text-gray-900">{filteredStudents.length}</span> entries</span>
+                  {filteredStudents.length !== students.length && (
+                    <span className="ml-2 text-gray-500">(filtered from {students.length} total)</span>
+                  )}
+                </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={handlePrevious}
+                      disabled={currentPage === 1}
+                      className="px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-gray-700 font-semibold hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
+                    >
+                      Previous
+                    </button>
+                    
+                    <div className="flex items-center space-x-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                        // Show first page, last page, current page, and pages around current
+                        if (
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 1 && page <= currentPage + 1)
+                        ) {
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => handlePageChange(page)}
+                              className={`px-3 py-2 border-2 rounded-lg font-semibold transition-all duration-200 shadow-sm hover:shadow-md ${
+                                currentPage === page
+                                  ? 'bg-blue-600 text-white border-blue-600'
+                                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          )
+                        } else if (
+                          page === currentPage - 2 ||
+                          page === currentPage + 2
+                        ) {
+                          return (
+                            <span key={page} className="px-2 text-gray-500">
+                              ...
+                            </span>
+                          )
+                        }
+                        return null
+                      })}
+                    </div>
+                    
+                    <button
+                      onClick={handleNext}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-2 border-2 border-gray-300 rounded-lg bg-white text-gray-700 font-semibold hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
