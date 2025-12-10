@@ -67,16 +67,31 @@ export default function ChangePasswordPage() {
     setIsSubmitting(true)
     
     try {
-      // TODO: Implement API call to change password
-      // const response = await fetch('/api/settings/change-password', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // })
+      // Get user ID from localStorage
+      const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      if (!userId) {
+        alert('User ID not found. Please login again.')
+        setIsSubmitting(false)
+        return
+      }
+
+      const response = await fetch('/api/settings/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userId,
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to change password')
+      }
+
       alert('Password changed successfully!')
       
       // Reset form
@@ -87,7 +102,7 @@ export default function ChangePasswordPage() {
       })
     } catch (error) {
       console.error('Error changing password:', error)
-      alert('Error changing password. Please try again.')
+      alert(`Error: ${error.message || 'Failed to change password. Please try again.'}`)
     } finally {
       setIsSubmitting(false)
     }

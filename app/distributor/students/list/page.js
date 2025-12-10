@@ -19,6 +19,8 @@ export default function DistributorListStudentsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRows, setSelectedRows] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState(null)
 
   useEffect(() => {
     // Get distributor name from localStorage
@@ -143,11 +145,16 @@ export default function DistributorListStudentsPage() {
 
   const handleViewPhoto = (student) => {
     if (student.photoUrl) {
-      // Open photo in new window
-      window.open(student.photoUrl, '_blank')
+      setSelectedStudent(student)
+      setIsModalOpen(true)
     } else {
       alert('No photo available for this student')
     }
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setSelectedStudent(null)
   }
 
   const handleEdit = (student) => {
@@ -821,6 +828,57 @@ export default function DistributorListStudentsPage() {
             </div>
           )}
         </div>
+
+        {/* Photo Modal */}
+        {isModalOpen && selectedStudent && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4" onClick={closeModal}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white">{selectedStudent.studentName}</h2>
+                <button
+                  onClick={closeModal}
+                  className="text-white hover:text-gray-200 transition-colors p-2 hover:bg-white/20 rounded-lg"
+                  aria-label="Close modal"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Modal Body */}
+              <div className="p-6 flex-1 overflow-y-auto flex items-center justify-center bg-gray-50">
+                <div className="w-full">
+                  <img
+                    src={selectedStudent.photoUrl}
+                    alt={selectedStudent.studentName}
+                    className="w-full h-auto max-h-[70vh] object-contain rounded-lg shadow-lg"
+                    onError={(e) => {
+                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="400" height="300" fill="%23f3f4f6"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-size="18"%3EImage not found%3C/text%3E%3C/svg%3E'
+                    }}
+                  />
+                </div>
+              </div>
+              
+              {/* Modal Footer */}
+              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Student Name:</p>
+                    <p className="text-lg font-semibold text-gray-900">{selectedStudent.studentName}</p>
+                  </div>
+                  {selectedStudent.admissionNo && (
+                    <div className="text-right">
+                      <p className="text-sm text-gray-600">Admission No:</p>
+                      <p className="text-lg font-semibold text-gray-900">{selectedStudent.admissionNo}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </DistributorLayout>
     </AuthGuard>
   )
