@@ -82,7 +82,7 @@ export default function DistributorDashboard() {
         {/* Page Title */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 via-gray-700 to-gray-600 bg-clip-text text-transparent">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back! Here's an overview of your data.</p>
+          <p className="text-gray-600 mt-2">Welcome back! Here&apos;s an overview of your data.</p>
         </div>
 
         {/* Dashboard Widgets */}
