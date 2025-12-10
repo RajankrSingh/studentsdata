@@ -170,7 +170,7 @@ export default function ListUsersPage() {
                 </svg>
               </div>
               <p className="text-xl font-semibold text-gray-600 mb-2">No users found</p>
-              <p className="text-sm text-gray-500">Click "Add User/School" to create a new user</p>
+              <p className="text-sm text-gray-500">Click &quot;Add User/School&quot; to create a new user</p>
             </div>
           ) : (
             <>
